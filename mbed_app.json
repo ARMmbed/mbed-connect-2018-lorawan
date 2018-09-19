@@ -259,6 +259,7 @@
     },
     "macros": [
         "MBEDTLS_USER_CONFIG_FILE=\"mbedtls_lora_config.h\"",
-        "MBED_TICKLESS=1"
+        "MBED_TICKLESS=1",
+        "MBED_CONF_APP_IDLE_THREAD_STACK_SIZE=0x400"
     ]
 }
