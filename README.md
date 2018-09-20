@@ -51,7 +51,21 @@ Grab the following items:
 * Thermistor.
 * Breadboard.
 
-*Todo: instructions on connecting the thermistor*
+## Hooking it up to the NUCLEO board
+
+![thermistor-pinout](media/LM35-Pinout.png)
+
+This is the LM35 pinout. Place it on a breadboard, and connect three wires to it. Make sure the orientation is correct!
+
+![nucleo-pinout](media/pinout2.png)
+
+This is the pinout of the *LEFT* side of the NUCLEO board (you should heva the USB connnection on the top). Connect:
+
+* Thermistor power -> RED.
+* Thermistor ground -> BLACK.
+* Thermistor data -> YELLOW.
+
+**If the thermistor gets hot, you did something wrong ;-)**
 
 ## 1. Some simple applications in the simulator
 
@@ -137,7 +151,13 @@ DigitalOut led(p5);
 EventQueue queue;
 
 void check_temperature() {
-    float tempC = (thermistor.read() * 3.685503686f * 100.0f);
+    uint16_t samples = 30;
+    float allReadings = 0.0f;
+    for (uint16_t ix = 0; ix < samples; ix++) {
+        allReadings += thermistor.read();
+    }
+
+    float tempC = allReadings / static_cast<float>(samples) / 5.0f * 1000.0f;
     led = tempC > 20.0f ? 1 : 0;
     printf("Temperature is %f\n", tempC);
 }
@@ -219,7 +239,7 @@ When you open Tera Term, select *Serial*, and then select the Mbed COM port.
 
 ![Tera Term](media/mbed5.png)
 
-#### OS/X
+#### macOS
 
 No need to install a driver. Open a terminal and run:
 
@@ -246,7 +266,7 @@ sudo screen /dev/ttyACM0 9600                # might not need sudo if set up lsu
 
 To exit, press `CTRL+A` then type `:quit`.
 
-## 4a. Getting data from the dust sensor
+## 4a. Getting data from the thermistor
 
 Look at the simulator code for interacting with the thermistor. Change the application so that it reads data from the real sensor.
 
@@ -303,6 +323,8 @@ Let's register this device in The Things Network and grab some keys!
 2. Click **register device**
 3. Enter a name.
 3. Click the 'Generate' button next to 'Device EUI'.
+
+    ![generate-eui](media/console4.png)
 
    >You can leave the Application EUI to be generated automatically.
 
@@ -488,6 +510,7 @@ Some extra credit excercises:
     * You have an idea on how to get data from The Things Network but we don't do much with it.
     * Add a web application that shows your devices and data.
     * Store the data somewhere.
+    * Here's something that you might like: https://github.com/janjongboom/ttn-sensor-maps
 
 Your pick!
 
