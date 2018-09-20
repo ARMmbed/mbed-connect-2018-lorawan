@@ -57,13 +57,13 @@ Grab the following items:
 
 This is the LM35 pinout. Place it on a breadboard, and connect three wires to it. Make sure the orientation is correct!
 
-![nucleo-pinout](media/pinout2.png)
+![nucleo-pinout](media/pinout-2.png)
 
 This is the pinout of the *LEFT* side of the NUCLEO board (you should heva the USB connnection on the top). Connect:
 
-* Thermistor power -> RED.
-* Thermistor ground -> BLACK.
-* Thermistor data -> YELLOW.
+* Thermistor VCC -> RED.
+* Thermistor Analog Out -> YELLOW.
+* Thermistor Ground -> BLACK.
 
 **If the thermistor gets hot, you did something wrong ;-)**
 
@@ -71,7 +71,7 @@ This is the pinout of the *LEFT* side of the NUCLEO board (you should heva the U
 
 There is an Mbed simulator which you can use to test things out quickly. Let's build some small examples:
 
-1. Go to [the simulator](http://labs.mbed.com/simulator/).
+1. Go to [the simulator](https://labs.mbed.com/simulator/).
 1. Load `Blinky`.
 
 This blinks the LED every 500 ms. We can make it dependend on an input signal as well. For example, place the following code in the editor and click *Compile*.
@@ -85,7 +85,7 @@ DigitalIn btn(BUTTON1);
 int main() {
     while (1) {
         led = btn.read() ? 1 : 0;
-        printf("Blink! LED is now %d\n", led.read());
+        printf("Blink! LED is now %d\r\n", led.read());
 
         wait_ms(500);
     }
@@ -122,7 +122,7 @@ InterruptIn btn(BUTTON1);
 
 void fall() {
     led = !led;
-    printf("LED is now %d\n", led);
+    printf("LED is now %d\r\n", led.read());
 }
 
 int main() {
@@ -159,11 +159,11 @@ void check_temperature() {
 
     float tempC = allReadings / static_cast<float>(samples) / 5.0f * 1000.0f;
     led = tempC > 20.0f ? 1 : 0;
-    printf("Temperature is %f\n", tempC);
+    printf("Temperature is %f\r\n", tempC);
 }
 
 int main() {
-    queue.call_every(100, &check_temperature);
+    queue.call_every(1000, &check_temperature);
 
     queue.dispatch_forever();
 }
@@ -193,21 +193,21 @@ This has cloned blinky.
     int main() {
         while (1) {
             led = !led;
-            printf("Blink! LED is now %d\n", led.read());
+            printf("Blink! LED is now %d\r\n", led.read());
 
-            wait_ms(500);
+            wait_ms(100);
         }
     }
     ```
 
 1. Click *Compile*.
-1. 1. A binary (.bin) file downloads, use drag-and-drop to drag the file to the NODE_L476RG device (like a USB mass storage device).
+1. A binary (.bin) file downloads, use drag-and-drop to drag the file to the NODE_L476RG device (like a USB mass storage device).
 
     **Note:** Here's a [video](https://youtu.be/L5TcmFFD0iw?t=1m25s).
 
-1. When flashing is complete, hit the **RESET** button on the board (next to USB).
+1. When flashing is complete, hit the *BLACK* button (under the shield).
 
-You should see the blue LED blink very fast. Your first program is running! Let's look at the logs now.
+You should see the LED blink very fast.
 
 Look at the examples you ran in the simulator, you can run them on the board too; just replace the code in `main.cpp`. Also:
 
@@ -281,7 +281,9 @@ Hook up an external LED. You'll need an LED, two jumper wires and a 100 Ohm resi
 Now it's time to send this data to the internet over LoRaWAN.
 
 1. In the Online Compiler, click *Import*.
+1. Click *Click here to import from URL*.
 1. Enter `https://github.com/janjongboom/uni-vienna-firmware`.
+1. Click *Import*.
 
 We need to program some keys in the device. LoRaWAN uses an end-to-end encryption scheme that uses two session keys. The network server holds one key, and the application server holds the other. (In this tutorial, TTN fulfils both roles). These session keys are created when the device joins the network. For the initial authentication with the network, the application needs its device EUI, the EUI of the application it wants to join (referred to as the application EUI) and a preshared key (the application key).
 
@@ -301,7 +303,7 @@ Let's register this device in The Things Network and grab some keys!
 3. Click **Applications**
 4. Click **Add application**
 5. Enter a **Application ID** and **Description**, this can be anything
-6. Be sure to select `ttn-handler-us-west` in **Handler registration**
+6. Be sure to select `ttn-handler-eu` in **Handler registration**
 
    ![add-application](media/add-application.png)
 
@@ -332,9 +334,9 @@ Let's register this device in The Things Network and grab some keys!
 
    ![device-overview](media/device-overview.png)
 
-   >Your device needs to be programmed with the **Application EUI** and **App Key**
+   >Your device needs to be programmed with the **Device EUI**, **Application EUI** and **App Key**
 
-7. Click the `< >` button of the **Application EUI** and **App Key** values to show the value as C-style array
+7. Click the `< >` button of the **Device EUI**, **Application EUI** and **App Key** values to show the value as C-style array
 8. Click the **Copy** button on the right of the value to copy to clipboard
 
    ![copy-appeui](media/copy-appeui.png)
@@ -343,6 +345,8 @@ Let's register this device in The Things Network and grab some keys!
 #### Pasting them in the Online Compiler
 
 In the Online Compiler now open `main.cpp`, and paste the Device EUI, Application EUI and Application Key in.
+
+![keys](media/keys1.png)
 
 **Note:** Do not forget the `;` after pasting.
 
@@ -389,8 +393,8 @@ With these keys we can write a Node.js application that can retrieve data from T
 1. Create a new folder:
 
     ```
-    $ mkdir sxsw-ttn-api
-    $ cd sxsw-ttn-api
+    $ mkdir viennna-ttn-api
+    $ cd viennna-ttn-api
     ```
 
 1. In this folder run:
@@ -458,10 +462,10 @@ let series = [];
 
 ttn.data(TTN_APP_ID, TTN_ACCESS_KEY).then(client => {
     client.on('uplink', (devId, payload) => {
-        // console.log('retrieved uplink message', devId, payload.payload_fields.analog_in_1 * 100);
+        // console.log('retrieved uplink message', devId, payload.payload_fields.temperature_1);
 
         data[0].x.push(new Date(payload.metadata.time).toLocaleTimeString().split(' ')[0]);
-        data[0].y.push(payload.payload_fields.analog_in_1 * 100);
+        data[0].y.push(payload.payload_fields.temperature_1);
 
         line.setData(data);
         screen.render();
@@ -516,6 +520,7 @@ Your pick!
 
 ## 10. How to do Debugging
 
+1. Install Mbed CLI and the GNU ARM Compiler toolchain (v6).
 1. Upgrade to JLink (ask Jan).
 1. Install JLink GDB Server.
 1. Run:
