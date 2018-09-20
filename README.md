@@ -5,7 +5,7 @@ In this session you'll be building five examples, introducing you to:
 1. Building IoT devices with [Arm Mbed OS](https://os.mbed.com/).
 1. Hooking up a thermistor to a development board.
 1. Connecting your device to [The Things Network](https://www.thethingsnetwork.org/) using LoRaWAN.
-1. Data visualization of particle sensors.
+1. Data visualization of temperature sensors.
 
 In case you're stuck this document will help you get back on track. If you're a fast learner, there are 'extra credit'-assignments at the end of each section. Please help your neighbours as well :-)
 
