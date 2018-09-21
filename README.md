@@ -7,7 +7,13 @@ In this session you'll be building five examples, introducing you to:
 1. Connecting your device to [The Things Network](https://www.thethingsnetwork.org/) using LoRaWAN.
 1. Data visualization of temperature sensors.
 
-In case you're stuck this document will help you get back on track. If you're a fast learner, there are 'extra credit'-assignments at the end of each section. Please help your neighbours as well :-)
+In case you're stuck this document will help you get back on track. Please help your neighbours as well :-)
+
+The Mbed OS documentation can be found here: [Mbed OS docs](https://os.mbed.com/docs/).
+
+If you use the search function on the website, make sure to tap the 'Documentation' tab:
+
+![docs](media/search1.png)
 
 ## Prerequisites
 
@@ -266,13 +272,108 @@ sudo screen /dev/ttyACM0 9600                # might not need sudo if set up lsu
 
 To exit, press `CTRL+A` then type `:quit`.
 
-## 4a. Getting data from the thermistor
+## 4a. Statistics and RTOS
+
+Mbed OS is an advanced Real-Time operating system that can spawn multiple threads and handle execution switching between them automatically. In addition it can automatically handle putting the MCU to sleep (or deep sleep). Let's look at how this works.
+
+1. Create a new file in the project called `mbed_app.json`, and fill it with:
+
+    ```json
+    {
+        "macros": [
+            "MBED_HEAP_STATS_ENABLED=1",
+            "MBED_STACK_STATS_ENABLED=1",
+            "MBED_CPU_STATS_ENABLED=1",
+            "MBED_TICKLESS=1"
+        ]
+    }
+    ```
+
+    > This enables diagnostics information
+
+1. In `main.cpp`, put;
+
+    ```cpp
+    #include "mbed.h"
+    #include "mbed_events.h"
+    #include "mbed_stats.h"
+
+    DigitalOut led(LED1);
+
+    void print_stats() {
+        // allocate enough room for every thread's stack statistics
+        int cnt = osThreadGetCount();
+        mbed_stats_stack_t *stats = (mbed_stats_stack_t*) malloc(cnt * sizeof(mbed_stats_stack_t));
+
+        cnt = mbed_stats_stack_get_each(stats, cnt);
+        for (int i = 0; i < cnt; i++) {
+            printf("Thread: 0x%lX, Stack size: %lu / %lu\r\n", stats[i].thread_id, stats[i].max_size, stats[i].reserved_size);
+        }
+        free(stats);
+
+        // Grab the heap statistics
+        mbed_stats_heap_t heap_stats;
+        mbed_stats_heap_get(&heap_stats);
+        printf("Heap size: %lu / %lu bytes\r\n", heap_stats.current_size, heap_stats.reserved_size);
+
+        mbed_stats_cpu_t cpu_stats;
+        mbed_stats_cpu_get(&cpu_stats);
+
+        printf("CPU: uptime=%lld, idle=%lld\r\n", cpu_stats.uptime, cpu_stats.idle_time);
+        printf("Sleep: sleep=%lld, deepsleep=%lld\r\n", cpu_stats.sleep_time, cpu_stats.deep_sleep_time);
+        printf("\r\n");
+    }
+
+    int main() {
+        while (1) {
+            print_stats();
+
+            led = !led;
+
+            Thread::wait(1000);
+        }
+    }
+    ```
+
+1. Flash this application on the board. What do you see?
+
+### Adding an extra thread
+
+You can run the stats tracking code in a separate thread. Replace the `int main()` function with:
+
+```cpp
+void new_thread_main() {
+    while (1) {
+        print_stats();
+
+        Thread::wait(2000);
+    }
+}
+
+int main() {
+    Thread new_thread;
+    new_thread.start(&new_thread_main);
+
+    while (1) {
+        led = !led;
+
+        Thread::wait(1000);
+    }
+}
+```
+
+Flash this on the board and compare with the previous output. What do you see? Do you see the new thread?
+
+**Assignment:** we use only a fraction of the stack of the new thread, but have allocated 4096 bytes for it. Make the stack size of the new thread smaller. [Here's the documentation](https://os.mbed.com/docs/v5.8/reference/thread.html).
+
+
+## 4b. Getting data from the thermistor
 
 Look at the simulator code for interacting with the thermistor. Change the application so that it reads data from the real sensor.
 
 Note that the thermistor is hooked up to `A2`, not `p15`.
 
-## 4b. Hooking up some other things
+## 4c. Hooking up some other things
 
 Hook up an external LED. You'll need an LED, two jumper wires and a 100 Ohm resistor. Hook it up to a digital pin.
 
