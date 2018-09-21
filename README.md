@@ -463,6 +463,8 @@ Right now we relay random numbers back to the device. Change the code so that it
 
 ## 7. Relaying data back to the device
 
+**Note:** Hook up an *external* LED to pin D7. The built-in LED is hooked up to a pin that the LoRa shield also uses!
+
 We only *send* messages to the network. But you can also relay data back to the device. Note that LoRaWAN devices can only receive messages when a RX window is open. This RX window opens right after a transmission, so you can only relay data back to the device right after sending.
 
 To send some data to the device:
