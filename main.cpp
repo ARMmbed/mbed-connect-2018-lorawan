@@ -20,14 +20,8 @@
 #include "mbed_trace.h"
 #include "LoRaWANInterface.h"
 #include "CayenneLPP.h"
-
-#ifdef TARGET_SIMULATOR
-#include "Sht31.h"
-#include "SX1276_LoRaRadio.h"
-SX1276_LoRaRadio radio(D11, D12, D13, D10, A0, D2, D3, D4, D5, D8, D9, NC, NC, NC, NC, A4, NC, NC);
-#else
 #include "lora_radio_helper.h"
-#endif
+#include "Grove_temperature.h"
 
 #define TX_INTERVAL         10000
 
@@ -98,12 +92,8 @@ int main (void)
  */
 static void send_message() {
 
-#ifdef TARGET_SIMULATOR
-    static Sht31 sht31(I2C_SDA, I2C_SCL);
-    float temperature = sht31.readTemperature();
-#else
+    // YOUR CODE HERE
     float temperature = static_cast<float>(rand()) / static_cast<float>(RAND_MAX / 50) + 10.0f;
-#endif
 
     CayenneLPP payload(50);
     payload.addTemperature(1, temperature);

@@ -32,7 +32,7 @@
             "platform.default-serial-baud-rate": 9600,
             "lora.over-the-air-activation": true,
             "lora.duty-cycle-on": true,
-            "lora.phy": "EU868",
+            "lora.phy": "US915",
             "mbed-trace.enable": 1
         },
 
