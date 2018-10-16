@@ -21,7 +21,7 @@
 #include "LoRaWANInterface.h"
 #include "CayenneLPP.h"
 #include "lora_radio_helper.h"
-#include "Grove_temperature.h"
+#include "Dht11.h"
 
 #define TX_INTERVAL         10000
 

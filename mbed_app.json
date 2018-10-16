@@ -33,6 +33,7 @@
             "lora.over-the-air-activation": true,
             "lora.duty-cycle-on": true,
             "lora.phy": "US915",
+            "lora.fsb-mask": "{0xFF00, 0x0000, 0x0000, 0x0000, 0x0002}",
             "mbed-trace.enable": 1
         },
 
