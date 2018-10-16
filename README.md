@@ -53,7 +53,7 @@ Grab the following items:
 Then:
 
 1. Click the shield on the board.
-1. Connect the temperature sensor to A1 on the shield.
+1. Connect the temperature sensor to D6 on the shield.
 1. Connect the board to your computer.
 
 ## 2. LoRaWAN topology
@@ -198,8 +198,9 @@ To exit, press `CTRL+A` then type `:quit`.
 Right now we relay random numbers back to the device. Change the code so that it sends the temperature from the temperature. Open `main.cpp`, and under `// YOUR CODE HERE` change the line to:
 
 ```cpp
-static Grove_temperature tempSensor(A1);
-float temperature = tempSensor.getTemperature();
+static Dht11 dht11(D6);
+int error = dht11.read();
+float temperature = dht11.getFahrenheit();
 ```
 
 Compile and flash the application again to see the changes.
